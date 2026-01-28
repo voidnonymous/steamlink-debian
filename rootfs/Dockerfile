@@ -9,7 +9,10 @@ RUN mkdir -p /lib/modules && mv /boot/$KERNEL_VERSION-steam /lib/modules/$KERNEL
 
 COPY ./rootfs/boot/* /boot/
 COPY ./rootfs/usr/bin/* /usr/bin/
+COPY ./rootfs/etc/systemd/system/steamlink-firstboot.service /etc/systemd/system/
 COPY ./rootfs/steamlink/ /steamlink/
+
+RUN chmod +x /usr/bin/steamlink-firstboot.sh
 
 # Add repositories
 RUN rm -rf /etc/apt/sources.list.d/* || true
@@ -37,6 +40,7 @@ RUN systemctl enable ssh
 RUN systemctl enable dbus
 RUN systemctl enable networking
 RUN systemctl enable systemd-timesyncd
+RUN systemctl enable steamlink-firstboot.service
 
 # /etc/network/interfaces setup
 RUN echo "allow-hotplug eth0" > /etc/network/interfaces

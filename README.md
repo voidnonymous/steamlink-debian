@@ -53,26 +53,46 @@ sudo hostnamectl set-hostname steamlink
 echo '127.0.0.1 steamlink' | sudo tee -a /etc/hosts
 ```
 
-### Resize root partition to full disk size
+### Automatic setup on first boot
 
-Resize the partition to take the entire space:
+On the first boot, the system will automatically:
+- Resize the root partition to take the entire space of the USB stick.
+- Resize the filesystem.
+- Create and enable a 1.5GB swap file.
+
+This process might take a few minutes depending on the speed of your USB stick. You can monitor the progress if you have a serial console connected, or just wait for the SSH service to become available.
+
+### Additional swap options
+
+#### ZRAM (Recommended for performance)
+
+While a 1.5GB swap file is created automatically, ZRAM provides a compressed swap space in RAM, which is much faster than swapping to a USB stick.
+
+Install `zram-tools`:
 
 ```bash
-sudo parted /dev/sda resizepart 1 100%
+sudo apt update
+sudo apt install zram-tools
 ```
 
-Confirm with `Yes` and press enter, then resize the filesystem:
+Configure it by editing `/etc/default/zramswap`:
 
-```
-sudo resize2fs /dev/sda1
+```bash
+# Set size to 60% of RAM
+echo 'PERCENT=60' | sudo tee /etc/default/zramswap
+# Use lz4 for better performance
+echo 'ALGO=lz4' | sudo tee -a /etc/default/zramswap
 ```
 
-This might take a while, depending on your disk size.
+Restart the service to apply:
+
+```bash
+sudo systemctl restart zramswap
+```
 
 ## What does not work
 
 - NAND driver
-- DMA controller
 - video/audio output
 - suspend/resume/halt/reboot
 - RTC
