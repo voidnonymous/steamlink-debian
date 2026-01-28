@@ -69,6 +69,25 @@ sudo resize2fs /dev/sda1
 
 This might take a while, depending on your disk size.
 
+### Set up swap
+
+Since the Steam Link has limited RAM, it's recommended to set up a swap file.
+
+Create a 512MB swap file:
+
+```bash
+sudo dd if=/dev/zero of=/swapfile bs=1M count=512
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+```
+
+To make it persistent across reboots, add it to `/etc/fstab`:
+
+```bash
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+
 ## What does not work
 
 - NAND driver
