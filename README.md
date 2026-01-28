@@ -71,9 +71,37 @@ This might take a while, depending on your disk size.
 
 ### Set up swap
 
-Since the Steam Link has limited RAM, it's recommended to set up a swap file.
+Since the Steam Link has limited RAM, it's recommended to set up swap. You can use a swap file on the USB stick, or ZRAM (compressed RAM swap) for better performance.
 
-Create a 512MB swap file:
+#### Option 1: ZRAM (Recommended)
+
+ZRAM provides a compressed swap space in RAM, which is much faster than swapping to a USB stick.
+
+Install `zram-tools`:
+
+```bash
+sudo apt update
+sudo apt install zram-tools
+```
+
+Configure it by editing `/etc/default/zramswap`:
+
+```bash
+# Set size to 60% of RAM
+echo 'PERCENT=60' | sudo tee /etc/default/zramswap
+# Use lz4 for better performance
+echo 'ALGO=lz4' | sudo tee -a /etc/default/zramswap
+```
+
+Restart the service to apply:
+
+```bash
+sudo systemctl restart zramswap
+```
+
+#### Option 2: Swap file
+
+If you need even more swap space, you can create a swap file on the USB stick:
 
 ```bash
 sudo dd if=/dev/zero of=/swapfile bs=1M count=512
@@ -91,7 +119,6 @@ echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 ## What does not work
 
 - NAND driver
-- DMA controller
 - video/audio output
 - suspend/resume/halt/reboot
 - RTC
