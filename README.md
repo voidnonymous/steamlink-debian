@@ -53,29 +53,20 @@ sudo hostnamectl set-hostname steamlink
 echo '127.0.0.1 steamlink' | sudo tee -a /etc/hosts
 ```
 
-### Resize root partition to full disk size
+### Automatic setup on first boot
 
-Resize the partition to take the entire space:
+On the first boot, the system will automatically:
+- Resize the root partition to take the entire space of the USB stick.
+- Resize the filesystem.
+- Create and enable a 1.5GB swap file.
 
-```bash
-sudo parted /dev/sda resizepart 1 100%
-```
+This process might take a few minutes depending on the speed of your USB stick. You can monitor the progress if you have a serial console connected, or just wait for the SSH service to become available.
 
-Confirm with `Yes` and press enter, then resize the filesystem:
+### Additional swap options
 
-```
-sudo resize2fs /dev/sda1
-```
+#### ZRAM (Recommended for performance)
 
-This might take a while, depending on your disk size.
-
-### Set up swap
-
-Since the Steam Link has limited RAM, it's recommended to set up swap. You can use a swap file on the USB stick, or ZRAM (compressed RAM swap) for better performance.
-
-#### Option 1: ZRAM (Recommended)
-
-ZRAM provides a compressed swap space in RAM, which is much faster than swapping to a USB stick.
+While a 1.5GB swap file is created automatically, ZRAM provides a compressed swap space in RAM, which is much faster than swapping to a USB stick.
 
 Install `zram-tools`:
 
@@ -97,23 +88,6 @@ Restart the service to apply:
 
 ```bash
 sudo systemctl restart zramswap
-```
-
-#### Option 2: Swap file
-
-If you need even more swap space, you can create a swap file on the USB stick:
-
-```bash
-sudo dd if=/dev/zero of=/swapfile bs=1M count=512
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
-```
-
-To make it persistent across reboots, add it to `/etc/fstab`:
-
-```bash
-echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 ```
 
 ## What does not work

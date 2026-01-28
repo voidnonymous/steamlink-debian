@@ -1,0 +1,12 @@
+[Unit]
+Description=Steam Link First Boot Setup
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/steamlink-firstboot.sh
+RemainAfterExit=yes
+TimeoutStartSec=infinity
+
+[Install]
+WantedBy=multi-user.target
