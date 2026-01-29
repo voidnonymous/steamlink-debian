@@ -1,0 +1,128 @@
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
+/*
+ * Copyright 2018 Alexander Monakov <amonakov@gmail.com>
+ * Refined for Steam Link Support with Modern Kernel
+ */
+/dts-v1/;
+
+#include "berlin2cd.dtsi"
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/clock/berlin2.h>
+
+/ {
+	model = "Valve Steam Link";
+	compatible = "valve,steamlink", "marvell,berlin2cd", "marvell,berlin";
+
+	memory@0 {
+		device_type = "memory";
+		reg = <0x00000000 0x1c000000>; /* 448 MB, top 64MB reserved for FB/GPU */
+	};
+
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		linux,cma {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x03000000>; /* 48MB for CMA */
+			linux,cma-default;
+		};
+
+		framebuffer_mem: framebuffer@1f000000 {
+			reg = <0x1f000000 0x01000000>; /* 16MB for SimpleFB */
+			no-map;
+		} ;
+	};
+
+	chosen {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		bootargs = "console=ttyS0,115200 earlycon";
+		framebuffer0: framebuffer@1f000000 {
+			compatible = "simple-framebuffer";
+			reg = <0x1f000000 0x00800000>; /* ~8MB for 1080p */
+			width = <1920>;
+			height = <1080>;
+			stride = <7680>; /* 1920 * 4 */
+			format = "a8r8g8b8";
+		};
+	};
+
+	gpio-restart {
+		compatible = "gpio-restart";
+		gpios = <&porta 6 GPIO_ACTIVE_HIGH>;
+		active-delay = <100>;
+		inactive-delay = <10>;
+		wait-delay = <100>;
+		priority = <200>;
+	};
+
+	soc@f7000000 {
+		gpu_2d: gpu@ef0000 {
+			compatible = "vivante,gc";
+			reg = <0xef0000 0x4000>;
+			interrupts = <GIC_SPI 6 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&chip_clk CLKID_GFX>;
+			clock-names = "core";
+			status = "okay";
+		};
+
+		gpu_3d: gpu@bc0000 {
+			compatible = "vivante,gc";
+			reg = <0xbc0000 0x4000>;
+			interrupts = <GIC_SPI 5 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&chip_clk CLKID_GFX3D_CORE>, <&chip_clk CLKID_GFX3D_SYS>;
+			clock-names = "core", "bus";
+			status = "okay";
+		};
+	};
+};
+
+&cpu {
+	cpu-supply = <&vcpu>;
+	operating-points = <
+		/* kHz    uV */
+		1200000 1325000
+		1000000 1325000
+		800000  1200000
+		600000  1100000
+	>;
+};
+
+&i2c0 {
+	status = "okay";
+
+	regulator@19 {
+		compatible = "marvell,88pg868";
+		reg = <0x19>;
+
+		vcpu: buck1 {
+			regulator-boot-on;
+			regulator-always-on;
+			regulator-min-microvolt = <1000000>;
+			regulator-max-microvolt = <1325000>;
+		};
+	};
+};
+
+/* Fixed interface to on-board Marvell 8897 Wi-Fi/Bluetooth/NFC chip. */
+&sdhci0 {
+	keep-power-in-suspend;
+	non-removable;
+	status = "okay";
+};
+
+&uart0 {
+	status = "okay";
+};
+
+&usb_phy1 { status = "okay"; };
+
+&usb1 {
+	dr_mode = "host";
+	status = "okay";
+};
+
+&eth1 { status = "okay"; };
