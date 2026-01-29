@@ -90,6 +90,16 @@ Restart the service to apply:
 sudo systemctl restart zramswap
 ```
 
+## Building from source
+
+You can build the entire image (kernel + rootfs) from source on a Linux machine with Docker and the required build tools installed.
+
+```bash
+./build_image.sh
+```
+
+This will produce a `steamlink-debian.img.xz` file that you can flash to a USB stick.
+
 ## What does not work
 
 - NAND driver

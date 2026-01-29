@@ -1,23 +1,36 @@
 #!/bin/bash
 
 set -e
+set -o pipefail
 
-echo "Starting Steam Link first boot setup..."
+LOG_FILE="/var/log/steamlink-firstboot.log"
+
+exec > >(tee -a "$LOG_FILE") 2>&1
+
+echo "--- Steam Link First Boot Setup Start: $(date) ---"
 
 # Resize partition 1 to 100% of the disk
-echo "Resizing partition..."
-parted --script /dev/sda resizepart 1 100%
+if [ -b /dev/sda ]; then
+    echo "Resizing partition /dev/sda1 to fill the disk..."
+    parted --script /dev/sda resizepart 1 100% || echo "Warning: parted returned non-zero, continuing..."
+else
+    echo "Error: /dev/sda not found. Skipping partition resize."
+fi
 
 # Resize the filesystem to fill the partition
-echo "Resizing filesystem..."
-resize2fs /dev/sda1
+echo "Resizing filesystem on /dev/sda1..."
+resize2fs /dev/sda1 || echo "Warning: resize2fs failed or partition already resized."
 
 # Create a 1.5GB swapfile
 if [ ! -f /swapfile ]; then
-    echo "Creating 1.5GB swapfile (this may take a while)..."
-    dd if=/dev/zero of=/swapfile bs=1M count=1536
+    echo "Creating 1.5GB swapfile at /swapfile (this may take a while)..."
+    dd if=/dev/zero of=/swapfile bs=1M count=1536 status=progress
+    echo "Setting swapfile permissions..."
     chmod 600 /swapfile
+    echo "Formatting swapfile..."
     mkswap /swapfile
+else
+    echo "Swapfile already exists at /swapfile."
 fi
 
 # Enable swap
@@ -31,7 +44,7 @@ if ! grep -q "/swapfile" /etc/fstab; then
 fi
 
 # Disable this service so it doesn't run again
-echo "Disabling first boot setup service..."
+echo "Disabling steamlink-firstboot.service..."
 systemctl disable steamlink-firstboot.service
 
-echo "First boot setup complete!"
+echo "--- Steam Link First Boot Setup Complete: $(date) ---"
