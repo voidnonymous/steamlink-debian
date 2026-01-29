@@ -23,17 +23,18 @@
 		#size-cells = <1>;
 		ranges;
 
+		/* Dedicated region for boot framebuffer to prevent corruption */
+		framebuffer_mem: framebuffer@1f000000 {
+			reg = <0x1f000000 0x01000000>; /* 16MB */
+			no-map;
+		};
+
 		linux,cma {
 			compatible = "shared-dma-pool";
 			reusable;
-			size = <0x03000000>; /* 48MB for CMA */
+			size = <0x03000000>; /* 48MB for CMA (Dynamic GPU Memory) */
 			linux,cma-default;
 		};
-
-		framebuffer_mem: framebuffer@1f000000 {
-			reg = <0x1f000000 0x01000000>; /* 16MB for SimpleFB */
-			no-map;
-		} ;
 	};
 
 	chosen {
