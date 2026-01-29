@@ -2,6 +2,9 @@
 
 This repository provides a way to run Debian GNU/Linux on a Valve Steam Link device using a USB stick.
 
+Heads up!
+This is a repo I made for messing with AI, and trying to get new features. There is a like, 10% chance this will build. Please use the base repo instead unless you want to debug Jules janky code.
+
 ```
 debian@steamlink:~$ fastfetch
        _,met$$$$$gg.           debian@steamlink
