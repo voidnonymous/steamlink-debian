@@ -19,6 +19,10 @@ cd linux-$KERNEL_VERSION
 cp ../kernel/6.1.115.config .config
 if [ -f ../kernel/berlin2cd-valve-steamlink.dts ]; then
     cp ../kernel/berlin2cd-valve-steamlink.dts arch/arm/boot/dts/
+    # Ensure the DTS is listed in the Makefile
+    if ! grep -q "berlin2cd-valve-steamlink.dtb" arch/arm/boot/dts/Makefile; then
+        sed -i '/berlin2cd-google-chromecast.dtb/a \tberlin2cd-valve-steamlink.dtb \\' arch/arm/boot/dts/Makefile
+    fi
 fi
 
 # Forcefully disable features that cause build issues in this environment
