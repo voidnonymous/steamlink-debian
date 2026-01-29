@@ -8,6 +8,7 @@
 #include "berlin2cd.dtsi"
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/clock/berlin2.h>
+#include <dt-bindings/thermal/thermal.h>
 
 / {
 	model = "Valve Steam Link";
@@ -35,6 +36,40 @@
 			size = <0x03000000>; /* 48MB for CMA (Dynamic GPU Memory) */
 			linux,cma-default;
 		};
+	};
+
+	thermal-zones {
+		soc_thermal: soc-thermal {
+			polling-delay-passive = <250>;
+			polling-delay = <1000>;
+			thermal-sensors = <&soc_temp>;
+
+			trips {
+				soc_alert: soc-alert {
+					temperature = <85000>;
+					hysteresis = <2000>;
+					type = "passive";
+				};
+				soc_crit: soc-crit {
+					temperature = <100000>;
+					hysteresis = <2000>;
+					type = "critical";
+				};
+			};
+
+			cooling-maps {
+				map0 {
+					trip = <&soc_alert>;
+					cooling-device = <&cpu THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+				};
+			};
+		};
+	};
+
+	soc_temp: thermal {
+		compatible = "generic-adc-thermal";
+		sensor-channel = <&adc 6>;
+		#thermal-sensor-cells = <0>;
 	};
 
 	chosen {
@@ -85,11 +120,14 @@
 	cpu-supply = <&vcpu>;
 	operating-points = <
 		/* kHz    uV */
+		1600000 1400000
+		1400000 1375000
 		1200000 1325000
-		1000000 1325000
-		800000  1200000
-		600000  1100000
+		1000000 1250000
+		800000  1100000
+		600000  1000000
 	>;
+	#cooling-cells = <2>;
 };
 
 &i2c0 {
@@ -103,7 +141,7 @@
 			regulator-boot-on;
 			regulator-always-on;
 			regulator-min-microvolt = <1000000>;
-			regulator-max-microvolt = <1325000>;
+			regulator-max-microvolt = <1400000>;
 		};
 	};
 };
