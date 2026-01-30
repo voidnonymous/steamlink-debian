@@ -25,7 +25,23 @@ debian@steamlink:~$ fastfetch
 
 ## How to use
 
+### Download Image
 Download an image of Debian version of your choice from the [Releases](https://github.com/djmuted/steamlink-debian/releases) page and flash it on a 2GB (or bigger) USB stick using [balenaEtcher](https://etcher.balena.io/) or any other USB flasher. SD cards paired with a USB SD Reader work as well.
+
+### Build from Source
+If you want to build the kernel or rootfs yourself:
+
+1. **Clone the repository**:
+   ```bash
+   git clone --recursive https://github.com/voidnonymous/steamlink-debian.git
+   cd steamlink-debian
+   ```
+
+2. **Run the build script**:
+   ```bash
+   # This will build the kernel and the rootfs image
+   bash build_image.sh
+   ```
 
 > :warning: **Warning**: Flashing the image on the USB stick will wipe all data stored on the device!
 
@@ -71,11 +87,17 @@ This might take a while, depending on your disk size.
 
 ## What does not work
 
-- NAND driver
-- DMA controller
-- video/audio output
-- suspend/resume/halt/reboot
-- RTC
+- NAND driver (Internal flash)
+- Suspend/Resume
+- RTC (Real Time Clock)
+
+## What works (New in Kernel 6.1)
+
+- **USB Audio**: Support for external USB sound cards.
+- **Video Output**: HDMI output enabled via Simple Framebuffer and Etnaviv GPU drivers.
+- **HW Acceleration**: Vivante GPU acceleration via `etnaviv`.
+- **Reboot**: Hardware restart is now functional.
+- **Turbo/Overclocking**: Support for up to 1.6GHz CPU clock.
 
 ## Credits
 
