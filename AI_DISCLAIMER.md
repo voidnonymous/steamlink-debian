@@ -22,15 +22,28 @@ We have successfully ported the following features from the legacy Kernel 3.8 to
 To continue this work or build the kernel on your local machine:
 
 ### 1. Host Dependencies
-The kernel build requires the following packages on an Ubuntu/Debian host:
+
+**Ubuntu/Debian**:
 ```bash
 sudo apt-get update && sudo apt-get install -y flex bison bc libelf-dev libssl-dev
 ```
 
+**Arch Linux**:
+```bash
+sudo pacman -S base-devel flex bison bc elfutils openssl
+```
+
 ### 2. Toolchain Fix
-The provided Steam Link SDK toolchain (`armv7a-cros-linux-gnueabi-gcc`) may look for `libmpfr.so.4`. On modern systems (like Ubuntu 24.04), you may need to symlink it:
+The provided Steam Link SDK toolchain (`armv7a-cros-linux-gnueabi-gcc`) may look for `libmpfr.so.4`.
+
+**Ubuntu/Debian**:
 ```bash
 sudo ln -s /usr/lib/x86_64-linux-gnu/libmpfr.so.6 /usr/lib/x86_64-linux-gnu/libmpfr.so.4
+```
+
+**Arch Linux**:
+```bash
+sudo ln -s /usr/lib/libmpfr.so.6 /usr/lib/libmpfr.so.4
 ```
 
 ### 3. Building
